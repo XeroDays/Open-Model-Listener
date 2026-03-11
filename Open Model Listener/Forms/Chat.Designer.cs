@@ -31,7 +31,7 @@
             txtMessage = new TextBox();
             label3 = new Label();
             btnSend = new Button();
-            lblChatMessage = new Label();
+            lblMessage = new TextBox();
             SuspendLayout();
             // 
             // txtMessage
@@ -66,21 +66,24 @@
             btnSend.UseVisualStyleBackColor = true;
             btnSend.Click += btnSend_Click;
             // 
-            // lblChatMessage
+            // lblMessage
             // 
-            lblChatMessage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            lblChatMessage.Location = new Point(12, 146);
-            lblChatMessage.Name = "lblChatMessage";
-            lblChatMessage.Size = new Size(859, 415);
-            lblChatMessage.TabIndex = 7;
-            lblChatMessage.Text = "Mesage : this is the message of the chat gpt here ";
+            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblMessage.BackColor = Color.FromArgb(224, 224, 224);
+            lblMessage.BorderStyle = BorderStyle.FixedSingle;
+            lblMessage.Location = new Point(12, 134);
+            lblMessage.Multiline = true;
+            lblMessage.Name = "lblMessage";
+            lblMessage.Size = new Size(859, 424);
+            lblMessage.TabIndex = 7;
+            lblMessage.Text = "Type Message Here";
             // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(883, 570);
-            Controls.Add(lblChatMessage);
+            Controls.Add(lblMessage);
             Controls.Add(btnSend);
             Controls.Add(txtMessage);
             Controls.Add(label3);
@@ -95,6 +98,6 @@
         private TextBox txtMessage;
         private Label label3;
         private Button btnSend;
-        public Label lblChatMessage;
+        private TextBox lblMessage;
     }
 }
