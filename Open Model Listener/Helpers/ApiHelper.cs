@@ -5,25 +5,26 @@ namespace Open_Model_Listener.Helpers
 {
     internal static class ApiHelper
     {
-        private const string Model = "stepfun/step-3.5-flash:free";
 
         private static readonly HttpClient HttpClient = new();
 
-        public static async Task<string> SendMessageAsync(string url, string apiKey, string message)
+        public static async Task<string> SendMessageAsync(string url, string apiKey, string modelName, string message)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.Add("Authorization", $"Bearer {apiKey}");
+            var trimmedKey = (apiKey ?? string.Empty).Trim();
+            request.Headers.Add("Authorization", $"Bearer {trimmedKey}");
+            request.Headers.Add("X-Title", "Open Model Listener");
 
             var body = new
             {
-                model = Model,
+                model = modelName,
                 messages = new[]
                 {
                     new { role = "user", content = message }
                 }
             };
 
-            request.Content = new StringContent(                JsonSerializer.Serialize(body),                Encoding.UTF8,                "application/json");
+            request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
 
             var response = await HttpClient.SendAsync(request);
 

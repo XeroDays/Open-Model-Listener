@@ -4,5 +4,6 @@ namespace Open_Model_Listener.Helpers
     {
         public static string Url { get; set; } = string.Empty;
         public static string BearerToken { get; set; } = string.Empty;
+        public static string ModelName { get; set; } = string.Empty;
     }
 }

@@ -12,8 +12,9 @@ namespace Open_Model_Listener
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            DataHelper.Url = txtUrl.Text;
-            DataHelper.BearerToken = txtAuthenticationToken.Text;
+            DataHelper.Url = txtUrl.Text?.Trim() ?? string.Empty;
+            DataHelper.BearerToken = txtAuthenticationToken.Text?.Trim() ?? string.Empty;
+            DataHelper.BearerToken = txtModelName.Text?.Trim() ?? string.Empty;
 
             Hide();
             var chatForm = new Chat();

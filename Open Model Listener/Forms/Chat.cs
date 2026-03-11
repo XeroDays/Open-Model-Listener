@@ -20,7 +20,7 @@ namespace Open_Model_Listener.Forms
 
             try
             {
-                var response = await ApiHelper.SendMessageAsync(    DataHelper.Url,  DataHelper.BearerToken,    message);
+                var response = await ApiHelper.SendMessageAsync(DataHelper.Url, DataHelper.BearerToken, DataHelper.ModelName, message);
                 lblMessage.Text = response;
             }
             catch (Exception ex)
