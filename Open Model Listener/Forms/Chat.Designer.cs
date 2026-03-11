@@ -32,6 +32,7 @@
             label3 = new Label();
             btnSend = new Button();
             lblMessage = new TextBox();
+            checkboxStream = new CheckBox();
             SuspendLayout();
             // 
             // txtMessage
@@ -78,11 +79,22 @@
             lblMessage.TabIndex = 7;
             lblMessage.Text = "Type Message Here";
             // 
+            // checkboxStream
+            // 
+            checkboxStream.AutoSize = true;
+            checkboxStream.Location = new Point(12, 49);
+            checkboxStream.Name = "checkboxStream";
+            checkboxStream.Size = new Size(78, 24);
+            checkboxStream.TabIndex = 8;
+            checkboxStream.Text = "Stream";
+            checkboxStream.UseVisualStyleBackColor = true;
+            // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(883, 570);
+            Controls.Add(checkboxStream);
             Controls.Add(lblMessage);
             Controls.Add(btnSend);
             Controls.Add(txtMessage);
@@ -99,5 +111,6 @@
         private Label label3;
         private Button btnSend;
         private TextBox lblMessage;
+        private CheckBox checkboxStream;
     }
 }
