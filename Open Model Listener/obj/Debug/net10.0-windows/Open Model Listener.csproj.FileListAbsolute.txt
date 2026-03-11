@@ -4,3 +4,15 @@ D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\
 D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.AssemblyInfoInputs.cache
 D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.AssemblyInfo.cs
 D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.csproj.CoreCompileInputs.cache
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\bin\Debug\net10.0-windows\Open Model Listener.exe
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\bin\Debug\net10.0-windows\Open Model Listener.deps.json
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\bin\Debug\net10.0-windows\Open Model Listener.runtimeconfig.json
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\bin\Debug\net10.0-windows\Open Model Listener.dll
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\bin\Debug\net10.0-windows\Open Model Listener.pdb
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open_Model_Listener.Forms.Chat.resources
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.sourcelink.json
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.dll
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\refint\Open Model Listener.dll
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.pdb
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\Open Model Listener.genruntimeconfig.cache
+D:\Projects\35. Open Model Listener\Open Model Listener\Open Model Listener\obj\Debug\net10.0-windows\ref\Open Model Listener.dll

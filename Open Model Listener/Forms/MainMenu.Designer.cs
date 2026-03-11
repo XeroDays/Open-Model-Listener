@@ -47,11 +47,13 @@
             // 
             // txtUrl
             // 
+            txtUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtUrl.BorderStyle = BorderStyle.FixedSingle;
             txtUrl.Location = new Point(151, 75);
             txtUrl.Name = "txtUrl";
-            txtUrl.Size = new Size(581, 27);
+            txtUrl.Size = new Size(607, 27);
             txtUrl.TabIndex = 1;
+            txtUrl.Text = "https://openrouter.ai/api/v1/chat/completions";
             // 
             // label2
             // 
@@ -65,12 +67,14 @@
             // 
             // txtAuthenticationToken
             // 
+            txtAuthenticationToken.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtAuthenticationToken.BorderStyle = BorderStyle.FixedSingle;
             txtAuthenticationToken.Location = new Point(151, 108);
             txtAuthenticationToken.Multiline = true;
             txtAuthenticationToken.Name = "txtAuthenticationToken";
-            txtAuthenticationToken.Size = new Size(581, 153);
+            txtAuthenticationToken.Size = new Size(607, 153);
             txtAuthenticationToken.TabIndex = 4;
+            txtAuthenticationToken.Text = "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";
             // 
             // label3
             // 
@@ -83,7 +87,8 @@
             // 
             // btnStart
             // 
-            btnStart.Location = new Point(472, 267);
+            btnStart.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnStart.Location = new Point(498, 267);
             btnStart.Name = "btnStart";
             btnStart.Size = new Size(260, 61);
             btnStart.TabIndex = 5;
@@ -96,7 +101,7 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(761, 362);
+            ClientSize = new Size(787, 349);
             Controls.Add(btnStart);
             Controls.Add(txtAuthenticationToken);
             Controls.Add(label3);
