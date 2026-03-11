@@ -14,12 +14,17 @@ namespace Open_Model_Listener
         {
             DataHelper.Url = txtUrl.Text?.Trim() ?? string.Empty;
             DataHelper.BearerToken = txtAuthenticationToken.Text?.Trim() ?? string.Empty;
-            DataHelper.BearerToken = txtModelName.Text?.Trim() ?? string.Empty;
+            DataHelper.ModelName = txtModelName.Text?.Trim() ?? string.Empty;
 
             Hide();
             var chatForm = new Chat();
             chatForm.FormClosed += (s, args) => Close();
             chatForm.Show();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            txtAuthenticationToken.Text = "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";
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Open_Model_Listener.Forms
+namespace Open_Model_Listener.Forms
 {
     partial class Chat
     {
@@ -45,6 +45,7 @@
             txtMessage.Size = new Size(645, 95);
             txtMessage.TabIndex = 6;
             txtMessage.Text = "Type Message Here";
+            txtMessage.KeyDown += txtMessage_KeyDown;
             // 
             // label3
             // 
@@ -88,6 +89,7 @@
             checkboxStream.TabIndex = 8;
             checkboxStream.Text = "Stream";
             checkboxStream.UseVisualStyleBackColor = true;
+            checkboxStream.CheckedChanged += checkboxStream_CheckedChanged;
             // 
             // Chat
             // 
