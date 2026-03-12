@@ -114,20 +114,20 @@ namespace Open_Model_Listener.Helpers
                                 {
                                     var text = reasoningContent.GetString();
                                     if (!string.IsNullOrEmpty(text))
-                                        onChunk(text, isReasoning: true);
+                                        onChunk(text, true);
                                 }
                                 else if (delta.TryGetProperty("reasoning", out var reasoning))
                                 {
                                     var text = reasoning.GetString();
                                     if (!string.IsNullOrEmpty(text))
-                                        onChunk(text, isReasoning: true);
+                                        onChunk(text, true);
                                 }
                                 // Regular content
                                 if (delta.TryGetProperty("content", out var content))
                                 {
                                     var text = content.GetString();
                                     if (!string.IsNullOrEmpty(text))
-                                        onChunk(text, isReasoning: false);
+                                        onChunk(text, false);
                                 }
                             }
                         }

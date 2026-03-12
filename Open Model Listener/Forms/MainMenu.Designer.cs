@@ -34,8 +34,6 @@
             txtAuthenticationToken = new TextBox();
             label3 = new Label();
             btnStart = new Button();
-            txtModelName = new TextBox();
-            label4 = new Label();
             SuspendLayout();
             // 
             // label1
@@ -99,33 +97,12 @@
             btnStart.UseVisualStyleBackColor = true;
             btnStart.Click += btnStart_Click;
             // 
-            // txtModelName
-            // 
-            txtModelName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtModelName.BorderStyle = BorderStyle.FixedSingle;
-            txtModelName.Location = new Point(151, 267);
-            txtModelName.Name = "txtModelName";
-            txtModelName.Size = new Size(607, 27);
-            txtModelName.TabIndex = 7;
-            txtModelName.Text = "stepfun/step-3.5-flash:free";
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(23, 272);
-            label4.Name = "label4";
-            label4.Size = new Size(96, 20);
-            label4.TabIndex = 6;
-            label4.Text = "Model Name";
-            // 
             // MainMenu
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             ClientSize = new Size(787, 412);
-            Controls.Add(txtModelName);
-            Controls.Add(label4);
             Controls.Add(btnStart);
             Controls.Add(txtAuthenticationToken);
             Controls.Add(label3);
@@ -148,7 +125,5 @@
         private TextBox txtAuthenticationToken;
         private Label label3;
         private Button btnStart;
-        private TextBox txtModelName;
-        private Label label4;
     }
 }

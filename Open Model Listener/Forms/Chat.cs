@@ -15,6 +15,8 @@ namespace Open_Model_Listener.Forms
             if (string.IsNullOrEmpty(message))
                 return;
 
+
+            DataHelper.ModelName = txtModelName.Text;
             lblMessage.Text = "Sending...";
             btnSend.Enabled = false;
 

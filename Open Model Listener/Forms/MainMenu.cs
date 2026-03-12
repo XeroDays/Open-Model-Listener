@@ -14,8 +14,7 @@ namespace Open_Model_Listener
         {
             DataHelper.Url = txtUrl.Text?.Trim() ?? string.Empty;
             DataHelper.BearerToken = txtAuthenticationToken.Text?.Trim() ?? string.Empty;
-            DataHelper.ModelName = txtModelName.Text?.Trim() ?? string.Empty;
-
+              
             Hide();
             var chatForm = new Chat();
             chatForm.FormClosed += (s, args) => Close();

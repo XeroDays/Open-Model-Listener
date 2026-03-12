@@ -33,6 +33,8 @@ namespace Open_Model_Listener.Forms
             btnSend = new Button();
             lblMessage = new TextBox();
             checkboxStream = new CheckBox();
+            txtModelName = new TextBox();
+            label4 = new Label();
             SuspendLayout();
             // 
             // txtMessage
@@ -42,7 +44,7 @@ namespace Open_Model_Listener.Forms
             txtMessage.Location = new Point(116, 24);
             txtMessage.Multiline = true;
             txtMessage.Name = "txtMessage";
-            txtMessage.Size = new Size(645, 95);
+            txtMessage.Size = new Size(721, 95);
             txtMessage.TabIndex = 6;
             txtMessage.Text = "Type Message Here";
             txtMessage.KeyDown += txtMessage_KeyDown;
@@ -60,9 +62,9 @@ namespace Open_Model_Listener.Forms
             // btnSend
             // 
             btnSend.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnSend.Location = new Point(767, 26);
+            btnSend.Location = new Point(843, 26);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(104, 93);
+            btnSend.Size = new Size(104, 126);
             btnSend.TabIndex = 1;
             btnSend.Text = "Send";
             btnSend.UseVisualStyleBackColor = true;
@@ -70,13 +72,13 @@ namespace Open_Model_Listener.Forms
             // 
             // lblMessage
             // 
-            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lblMessage.BackColor = Color.FromArgb(224, 224, 224);
             lblMessage.BorderStyle = BorderStyle.FixedSingle;
-            lblMessage.Location = new Point(12, 134);
+            lblMessage.Location = new Point(12, 161);
             lblMessage.Multiline = true;
             lblMessage.Name = "lblMessage";
-            lblMessage.Size = new Size(859, 424);
+            lblMessage.Size = new Size(935, 424);
             lblMessage.TabIndex = 7;
             lblMessage.Text = "Type Message Here";
             // 
@@ -91,11 +93,32 @@ namespace Open_Model_Listener.Forms
             checkboxStream.UseVisualStyleBackColor = true;
             checkboxStream.CheckedChanged += checkboxStream_CheckedChanged;
             // 
+            // txtModelName
+            // 
+            txtModelName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtModelName.BorderStyle = BorderStyle.FixedSingle;
+            txtModelName.Location = new Point(116, 125);
+            txtModelName.Name = "txtModelName";
+            txtModelName.Size = new Size(721, 27);
+            txtModelName.TabIndex = 10;
+            txtModelName.Text = "stepfun/step-3.5-flash:free";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(7, 128);
+            label4.Name = "label4";
+            label4.Size = new Size(96, 20);
+            label4.TabIndex = 9;
+            label4.Text = "Model Name";
+            // 
             // Chat
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(883, 570);
+            ClientSize = new Size(959, 597);
+            Controls.Add(txtModelName);
+            Controls.Add(label4);
             Controls.Add(checkboxStream);
             Controls.Add(lblMessage);
             Controls.Add(btnSend);
@@ -114,5 +137,7 @@ namespace Open_Model_Listener.Forms
         private Button btnSend;
         private TextBox lblMessage;
         private CheckBox checkboxStream;
+        private TextBox txtModelName;
+        private Label label4;
     }
 }
