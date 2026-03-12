@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "bRnB4pI1ZBQ=",
+  "dgSpecHash": "P86F4ycN2+A=",
   "success": true,
   "projectFilePath": "D:\\Projects\\35. Open Model Listener\\Open Model Listener\\Open Model Listener\\Open Model Listener.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\User\\.nuget\\packages\\markdig\\0.37.0\\markdig.0.37.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.web.webview2\\1.0.2651.64\\microsoft.web.webview2.1.0.2651.64.nupkg.sha512"
+  ],
   "logs": []
 }

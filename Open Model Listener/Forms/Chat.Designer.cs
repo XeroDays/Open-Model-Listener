@@ -31,7 +31,7 @@ namespace Open_Model_Listener.Forms
             txtMessage = new TextBox();
             label3 = new Label();
             btnSend = new Button();
-            lblMessage = new TextBox();
+            webViewResponse = new Microsoft.Web.WebView2.WinForms.WebView2();
             checkboxStream = new CheckBox();
             txtModelName = new TextBox();
             label4 = new Label();
@@ -70,17 +70,16 @@ namespace Open_Model_Listener.Forms
             btnSend.UseVisualStyleBackColor = true;
             btnSend.Click += btnSend_Click;
             // 
-            // lblMessage
+            // webViewResponse
             // 
-            lblMessage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            lblMessage.BackColor = Color.FromArgb(224, 224, 224);
-            lblMessage.BorderStyle = BorderStyle.FixedSingle;
-            lblMessage.Location = new Point(12, 161);
-            lblMessage.Multiline = true;
-            lblMessage.Name = "lblMessage";
-            lblMessage.Size = new Size(935, 424);
-            lblMessage.TabIndex = 7;
-            lblMessage.Text = "Type Message Here";
+            webViewResponse.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            webViewResponse.CreationProperties = null;
+            webViewResponse.DefaultBackgroundColor = Color.White;
+            webViewResponse.Location = new Point(12, 161);
+            webViewResponse.Name = "webViewResponse";
+            webViewResponse.Size = new Size(935, 424);
+            webViewResponse.TabIndex = 7;
+            webViewResponse.ZoomFactor = 1D;
             // 
             // checkboxStream
             // 
@@ -122,12 +121,13 @@ namespace Open_Model_Listener.Forms
             Controls.Add(txtModelName);
             Controls.Add(label4);
             Controls.Add(checkboxStream);
-            Controls.Add(lblMessage);
+            Controls.Add(webViewResponse);
             Controls.Add(btnSend);
             Controls.Add(txtMessage);
             Controls.Add(label3);
             Name = "Chat";
             Text = "Chat";
+            Load += Chat_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -137,7 +137,7 @@ namespace Open_Model_Listener.Forms
         private TextBox txtMessage;
         private Label label3;
         private Button btnSend;
-        private TextBox lblMessage;
+        private Microsoft.Web.WebView2.WinForms.WebView2 webViewResponse;
         private CheckBox checkboxStream;
         private TextBox txtModelName;
         private Label label4;
