@@ -85,6 +85,8 @@ namespace Open_Model_Listener.Forms
             // checkboxStream
             // 
             checkboxStream.AutoSize = true;
+            checkboxStream.Checked = true;
+            checkboxStream.CheckState = CheckState.Checked;
             checkboxStream.Location = new Point(12, 49);
             checkboxStream.Name = "checkboxStream";
             checkboxStream.Size = new Size(78, 24);
