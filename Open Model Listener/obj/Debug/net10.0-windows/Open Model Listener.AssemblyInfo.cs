@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Open Model Listener")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a42ad8c7c991fc87368e87f24b7da83305635f94")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5541258d25bffbeb1a1c97f0a79559f504266376")]
 [assembly: System.Reflection.AssemblyProductAttribute("Open Model Listener")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Open Model Listener")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

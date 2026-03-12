@@ -75,7 +75,6 @@
             txtAuthenticationToken.Name = "txtAuthenticationToken";
             txtAuthenticationToken.Size = new Size(607, 153);
             txtAuthenticationToken.TabIndex = 4;
-            txtAuthenticationToken.Text = "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";
             // 
             // label3
             // 

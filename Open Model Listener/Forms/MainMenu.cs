@@ -23,7 +23,7 @@ namespace Open_Model_Listener
 
         private void label2_Click(object sender, EventArgs e)
         {
-            txtAuthenticationToken.Text = "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";
+            
         }
     }
 }
