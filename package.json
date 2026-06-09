@@ -1,0 +1,43 @@
+{
+  "name": "open-model-listener",
+  "version": "1.0.0",
+  "description": "Open Model Listener - Electron desktop app",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "node scripts/start-electron.js",
+    "build": "electron-builder --publish never",
+    "build:win": "electron-builder --win --publish never"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.xerodays.open-model-listener",
+    "productName": "Open Model Listener",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "publish": null,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

@@ -1,5 +1,9 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
+﻿node_modules/
+dist/
+out/
+*.log
+.DS_Store
+.env
 /.vs
+bin/
+obj/
