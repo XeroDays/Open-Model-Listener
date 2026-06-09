@@ -12,8 +12,10 @@ body {
 
 body.app-shell {
   font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-normal);
+  background: var(--bg-base);
+  color: var(--text-primary);
 }
 
 .app-main {
@@ -22,18 +24,120 @@ body.app-shell {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem;
+  padding: var(--space-xl);
   text-align: center;
 }
 
 .app-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.75rem;
-  font-weight: 600;
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
 }
 
-.app-status {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 0.95rem;
+.app-subtitle {
+  margin: 0 0 var(--space-lg);
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+.app-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.config-form {
+  width: 100%;
+  max-width: 400px;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: var(--space-md);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--accent);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-select {
+  cursor: pointer;
+}
+
+.form-error {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-sm);
+  color: #f08080;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.btn {
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-bg-hover);
+}
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border-color: var(--btn-secondary-border);
+}
+
+.btn-secondary:hover {
+  background: var(--btn-secondary-bg-hover);
 }

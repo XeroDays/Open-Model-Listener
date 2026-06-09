@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+  <title>Chat — Open Model Listener</title>
+  <link rel="stylesheet" href="../../styles/tokens.css">
+  <link rel="stylesheet" href="../../styles/app.css">
+  <link rel="stylesheet" href="styles/chat.css">
+</head>
+<body class="app-shell chat-shell">
+  <header class="chat-header">
+    <button type="button" id="btn-back" class="btn btn-secondary btn-sm">← Back</button>
+    <span class="chat-header-title">Open Model Listener</span>
+  </header>
+
+  <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
+
+  <footer class="chat-footer">
+    <div class="chat-input-row">
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        placeholder="Type a message…"
+        rows="1"
+        aria-label="Message input"
+      ></textarea>
+      <button type="button" id="btn-send" class="btn btn-primary">Send</button>
+    </div>
+  </footer>
+
+  <script type="module" src="../../scripts/chat.js"></script>
+</body>
+</html>
