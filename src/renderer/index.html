@@ -10,12 +10,30 @@
 </head>
 <body class="app-shell">
   <main class="app-main">
+    <img
+      class="app-logo"
+      src="assets/logo/logo.png"
+      alt="Open Model Listener"
+      width="96"
+      height="96"
+    />
     <h1 class="app-title">Open Model Listener</h1>
     <p class="app-subtitle">Configure your AI connection</p>
 
     <form id="config-form" class="config-form">
       <div class="form-group">
-        <label class="form-label" for="api-key">API Key</label>
+        <div class="form-label-row">
+          <label class="form-label" for="api-key">API Key</label>
+          <span class="info-tip" tabindex="0" aria-describedby="api-key-tip">
+            <svg class="info-tip__icon" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+              <circle cx="7" cy="7" r="6.25" fill="none" stroke="currentColor" stroke-width="1.25"/>
+              <path fill="currentColor" d="M6.4 6.1h1.2V4.5H6.4v1.6zm0 3.4h1.2V6.9H6.4v2.6z"/>
+            </svg>
+            <span id="api-key-tip" class="info-tip__bubble" role="tooltip">
+              Log in to the OpenRouter dashboard, generate an API key, and paste it here.
+            </span>
+          </span>
+        </div>
         <input
           type="password"
           id="api-key"
@@ -27,7 +45,18 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="model">Model</label>
+        <div class="form-label-row">
+          <label class="form-label" for="model">Model</label>
+          <span class="info-tip" tabindex="0" aria-describedby="model-tip">
+            <svg class="info-tip__icon" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+              <circle cx="7" cy="7" r="6.25" fill="none" stroke="currentColor" stroke-width="1.25"/>
+              <path fill="currentColor" d="M6.4 6.1h1.2V4.5H6.4v1.6zm0 3.4h1.2V6.9H6.4v2.6z"/>
+            </svg>
+            <span id="model-tip" class="info-tip__bubble" role="tooltip">
+              Enter the OpenRouter model ID (e.g. openai/gpt-oss-120b:free). Browse models on the OpenRouter dashboard and paste the model name here.
+            </span>
+          </span>
+        </div>
         <input
           type="text"
           id="model"
@@ -38,7 +67,18 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="reasoning">Reasoning Level</label>
+        <div class="form-label-row">
+          <label class="form-label" for="reasoning">Reasoning Level</label>
+          <span class="info-tip" tabindex="0" aria-describedby="reasoning-tip">
+            <svg class="info-tip__icon" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+              <circle cx="7" cy="7" r="6.25" fill="none" stroke="currentColor" stroke-width="1.25"/>
+              <path fill="currentColor" d="M6.4 6.1h1.2V4.5H6.4v1.6zm0 3.4h1.2V6.9H6.4v2.6z"/>
+            </svg>
+            <span id="reasoning-tip" class="info-tip__bubble" role="tooltip">
+              Controls how much step-by-step reasoning the model uses before replying. None turns it off; higher levels think longer and may use more tokens.
+            </span>
+          </span>
+        </div>
         <select id="reasoning" class="form-select">
           <option value="None" selected>None</option>
           <option value="Low">Low</option>

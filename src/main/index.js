@@ -3,6 +3,10 @@ const { createMainWindow } = require("./windows/main-window");
 const { registerIpcHandlers } = require("./ipc/register");
 
 app.whenReady().then(() => {
+  if (process.platform === "win32") {
+    app.setAppUserModelId("com.xerodays.open-model-listener");
+  }
+
   Menu.setApplicationMenu(null);
   registerIpcHandlers();
   createMainWindow();

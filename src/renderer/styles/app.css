@@ -28,6 +28,14 @@ body.app-shell {
   text-align: center;
 }
 
+.app-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto var(--space-md);
+  object-fit: contain;
+}
+
 .app-title {
   margin: 0 0 var(--space-sm);
   font-size: var(--text-xl);
@@ -57,12 +65,83 @@ body.app-shell {
   margin-bottom: var(--space-md);
 }
 
+.form-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.form-label-row .form-label {
+  margin-bottom: 0;
+}
+
 .form-label {
   display: block;
   margin-bottom: var(--space-xs);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
+}
+
+.info-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: help;
+  outline: none;
+}
+
+.info-tip:hover,
+.info-tip:focus-visible {
+  color: var(--accent);
+}
+
+.info-tip__icon {
+  display: block;
+}
+
+.info-tip__bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--space-xs));
+  z-index: 10;
+  width: max-content;
+  max-width: 240px;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.45;
+  color: var(--text-primary);
+  text-align: left;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+}
+
+.info-tip__bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 6px solid transparent;
+  border-top-color: var(--border-subtle);
+  transform: translateX(-50%);
+}
+
+.info-tip:hover .info-tip__bubble,
+.info-tip:focus-visible .info-tip__bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .form-input,

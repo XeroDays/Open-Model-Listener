@@ -1,10 +1,16 @@
 const { BrowserWindow } = require("electron");
 const path = require("path");
 
+const WINDOW_ICON =
+  process.platform === "win32"
+    ? path.join(__dirname, "../../../build/icon.ico")
+    : path.join(__dirname, "../../renderer/assets/logo/logo.png");
+
 function createMainWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: WINDOW_ICON,
     autoHideMenuBar: true,
     show: false,
     webPreferences: {
