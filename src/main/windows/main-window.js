@@ -4,7 +4,7 @@ const path = require("path");
 const WINDOW_ICON =
   process.platform === "win32"
     ? path.join(__dirname, "../../../build/icon.ico")
-    : path.join(__dirname, "../../renderer/assets/logo/logo.png");
+    : path.join(__dirname, "../../renderer/assets/logo/Application logo.png");
 
 function createMainWindow() {
   const win = new BrowserWindow({
