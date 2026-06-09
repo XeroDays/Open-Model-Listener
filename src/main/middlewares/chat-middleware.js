@@ -4,6 +4,8 @@ const aiService = require("../services/ai-service");
 
 function buildReasoningOptions(level) {
   switch (level) {
+    case "None":
+      return { effort: "none", exclude: true };
     case "Low":
       return { effort: "low" };
     case "Medium":
@@ -13,7 +15,7 @@ function buildReasoningOptions(level) {
     case "Ultra High":
       return { max_tokens: 16000 };
     default:
-      return null;
+      return { effort: "none", exclude: true };
   }
 }
 
@@ -49,6 +51,11 @@ function SendMessage({ messages } = {}, sender) {
         error: message,
       });
       safeSend(sender, channels.CHAT_ERROR, { message });
+    },
+    (delta) => {
+      if (reasoningLevel !== "None") {
+        safeSend(sender, channels.CHAT_REASONING_DELTA, { delta });
+      }
     }
   );
 

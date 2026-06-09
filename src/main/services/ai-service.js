@@ -1,5 +1,41 @@
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
+function extractReasoningDeltas(delta) {
+  if (!delta || typeof delta !== "object") return [];
+
+  const chunks = [];
+
+  if (typeof delta.reasoning === "string" && delta.reasoning.length > 0) {
+    chunks.push(delta.reasoning);
+  }
+  if (typeof delta.reasoning_content === "string" && delta.reasoning_content.length > 0) {
+    chunks.push(delta.reasoning_content);
+  }
+  if (Array.isArray(delta.reasoning_details)) {
+    for (const detail of delta.reasoning_details) {
+      if (detail?.type === "reasoning.text" && typeof detail.text === "string" && detail.text.length > 0) {
+        chunks.push(detail.text);
+      }
+    }
+  }
+
+  return chunks;
+}
+
+function processStreamChunk(json, onDelta, onReasoningDelta) {
+  const choiceDelta = json.choices?.[0]?.delta;
+  if (!choiceDelta) return;
+
+  for (const reasoningChunk of extractReasoningDeltas(choiceDelta)) {
+    onReasoningDelta(reasoningChunk);
+  }
+
+  const content = choiceDelta.content;
+  if (typeof content === "string" && content.length > 0) {
+    onDelta(content);
+  }
+}
+
 async function streamChat(
   messages,
   model,
@@ -7,7 +43,8 @@ async function streamChat(
   reasoningOptions,
   onDelta,
   onDone,
-  onError
+  onError,
+  onReasoningDelta = () => {}
 ) {
   if (!apiKey) {
     const err = new Error("API key is not configured. Go back and enter your OpenRouter API key.");
@@ -98,12 +135,24 @@ async function streamChat(
             onError(new Error(json.error.message || String(json.error)));
             return;
           }
-          const delta = json.choices?.[0]?.delta?.content;
-          if (typeof delta === "string" && delta.length > 0) {
-            onDelta(delta);
-          }
+          processStreamChunk(json, onDelta, onReasoningDelta);
         } catch {
           // skip malformed SSE chunks
+        }
+      }
+    }
+
+    if (buffer.trim()) {
+      const line = buffer.trim();
+      if (line.startsWith("data:")) {
+        const data = line.slice(5).trim();
+        if (data !== "[DONE]") {
+          try {
+            const json = JSON.parse(data);
+            processStreamChunk(json, onDelta, onReasoningDelta);
+          } catch {
+            // skip malformed SSE chunks
+          }
         }
       }
     }

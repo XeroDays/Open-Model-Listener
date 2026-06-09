@@ -6,6 +6,7 @@ const CH = {
   GET_CONFIG: "oml:get-config",
   CHAT_SEND: "oml:chat-send",
   CHAT_DELTA: "oml:chat-delta",
+  CHAT_REASONING_DELTA: "oml:chat-reasoning-delta",
   CHAT_DONE: "oml:chat-done",
   CHAT_ERROR: "oml:chat-error",
 };
@@ -23,6 +24,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getConfig: (key) => ipcRenderer.invoke(CH.GET_CONFIG, key),
   chatSend: (payload) => ipcRenderer.invoke(CH.CHAT_SEND, payload),
   onChatDelta: (cb) => subscribe(CH.CHAT_DELTA, cb),
+  onChatReasoningDelta: (cb) => subscribe(CH.CHAT_REASONING_DELTA, cb),
   onChatDone: (cb) => subscribe(CH.CHAT_DONE, cb),
   onChatError: (cb) => subscribe(CH.CHAT_ERROR, cb),
 });

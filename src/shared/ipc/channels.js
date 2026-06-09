@@ -4,6 +4,7 @@ module.exports = {
   GET_CONFIG: "oml:get-config",
   CHAT_SEND: "oml:chat-send",
   CHAT_DELTA: "oml:chat-delta",
+  CHAT_REASONING_DELTA: "oml:chat-reasoning-delta",
   CHAT_DONE: "oml:chat-done",
   CHAT_ERROR: "oml:chat-error",
 };
