@@ -24,6 +24,28 @@ function safeSend(sender, channel, payload) {
   sender.send(channel, payload);
 }
 
+function createDeltaBatcher(sender, channel, flushMs = 50) {
+  let buffer = "";
+  let timer = null;
+
+  const flush = () => {
+    timer = null;
+    if (!buffer) return;
+    const delta = buffer;
+    buffer = "";
+    safeSend(sender, channel, { delta });
+  };
+
+  return {
+    push(chunk) {
+      if (!chunk) return;
+      buffer += chunk;
+      if (!timer) timer = setTimeout(flush, flushMs);
+    },
+    flush,
+  };
+}
+
 function SendMessage({ messages } = {}, sender) {
   const apiKey = configService.get("apiKey");
   const model = configService.get("model");
@@ -35,14 +57,36 @@ function SendMessage({ messages } = {}, sender) {
     return { ok: false };
   }
 
+  console.log("[chat-middleware] SendMessage → starting stream", {
+    model,
+    reasoningLevel,
+    messageCount: messages.length,
+    promptChars: messages.reduce(
+      (sum, m) => sum + (typeof m?.content === "string" ? m.content.length : 0),
+      0
+    ),
+  });
+
+  const contentBatcher = createDeltaBatcher(sender, channels.CHAT_DELTA, 50);
+  const reasoningBatcher =
+    reasoningLevel !== "None"
+      ? createDeltaBatcher(sender, channels.CHAT_REASONING_DELTA, 50)
+      : null;
+
   aiService.streamChat(
     messages,
     model,
     apiKey,
     reasoningOptions,
-    (delta) => safeSend(sender, channels.CHAT_DELTA, { delta }),
-    () => safeSend(sender, channels.CHAT_DONE, {}),
+    (delta) => contentBatcher.push(delta),
+    () => {
+      reasoningBatcher?.flush();
+      contentBatcher.flush();
+      safeSend(sender, channels.CHAT_DONE, {});
+    },
     (err) => {
+      reasoningBatcher?.flush();
+      contentBatcher.flush();
       const message = err?.message || String(err);
       console.error("[chat-middleware] SendMessage: OpenRouter request failed", {
         model,
@@ -52,11 +96,7 @@ function SendMessage({ messages } = {}, sender) {
       });
       safeSend(sender, channels.CHAT_ERROR, { message });
     },
-    (delta) => {
-      if (reasoningLevel !== "None") {
-        safeSend(sender, channels.CHAT_REASONING_DELTA, { delta });
-      }
-    }
+    (delta) => reasoningBatcher?.push(delta)
   );
 
   return { ok: true };

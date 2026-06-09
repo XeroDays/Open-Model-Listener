@@ -17,6 +17,15 @@ let unsubReasoningDelta = null;
 let unsubDone = null;
 let unsubError = null;
 
+const REASONING_UI_FLUSH_MS = 150;
+const REASONING_MATH_MAX_CHARS = 12000;
+const CONTENT_UI_FLUSH_MS = 50;
+
+let reasoningPending = "";
+let reasoningFlushTimer = null;
+let contentPending = "";
+let contentFlushTimer = null;
+
 function scrollToBottom() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -74,6 +83,11 @@ function createAiMessageBlock() {
       const isOpen = thinkingPanel.classList.toggle("is-open");
       thinkingToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
       if (isOpen) {
+        if (reasoningPending) {
+          streamedReasoning += reasoningPending;
+          reasoningPending = "";
+        }
+        thinkingBody.textContent = streamedReasoning;
         thinkingBody.scrollTop = thinkingBody.scrollHeight;
       }
     });
@@ -103,12 +117,77 @@ function createAiMessageBlock() {
 
 function updateThinkingLabel(aiBlock) {
   if (!aiBlock?.thinkingLabel) return;
+  const charCount = streamedReasoning.length + reasoningPending.length;
   if (!contentStarted) {
-    aiBlock.thinkingLabel.textContent = `Thinking\u2026 (${streamedReasoning.length} chars)`;
+    aiBlock.thinkingLabel.textContent = `Thinking\u2026 (${charCount.toLocaleString()} chars)`;
     return;
   }
-  if (streamedReasoning.length > 0) {
-    aiBlock.thinkingLabel.textContent = `See thinking (${streamedReasoning.length} chars)`;
+  if (charCount > 0) {
+    aiBlock.thinkingLabel.textContent = `See thinking (${charCount.toLocaleString()} chars)`;
+  }
+}
+
+function syncThinkingBody(aiBlock) {
+  if (!aiBlock?.thinkingBody) return;
+  if (!aiBlock.thinkingPanel?.classList.contains("is-open")) return;
+  aiBlock.thinkingBody.textContent = streamedReasoning;
+  aiBlock.thinkingBody.scrollTop = aiBlock.thinkingBody.scrollHeight;
+}
+
+function flushReasoningUI() {
+  reasoningFlushTimer = null;
+  if (!currentAiBlock || !reasoningPending) return;
+
+  streamedReasoning += reasoningPending;
+  reasoningPending = "";
+
+  if (currentAiBlock.thinkingPanel) {
+    currentAiBlock.thinkingPanel.hidden = false;
+    if (!contentStarted) {
+      currentAiBlock.thinkingPanel.classList.add("is-streaming");
+    }
+  }
+
+  updateThinkingLabel(currentAiBlock);
+  syncThinkingBody(currentAiBlock);
+}
+
+function scheduleReasoningUI() {
+  if (reasoningFlushTimer) return;
+  reasoningFlushTimer = setTimeout(flushReasoningUI, REASONING_UI_FLUSH_MS);
+}
+
+function flushContentUI() {
+  contentFlushTimer = null;
+  if (!currentAiBlock || !contentPending) return;
+
+  streamedContent += contentPending;
+  contentPending = "";
+  currentAiBlock.responseBubble.textContent = streamedContent;
+  scrollToBottom();
+}
+
+function scheduleContentUI() {
+  if (contentFlushTimer) return;
+  contentFlushTimer = setTimeout(flushContentUI, CONTENT_UI_FLUSH_MS);
+}
+
+function flushPendingStreamUI() {
+  if (reasoningFlushTimer) {
+    clearTimeout(reasoningFlushTimer);
+    reasoningFlushTimer = null;
+  }
+  if (contentFlushTimer) {
+    clearTimeout(contentFlushTimer);
+    contentFlushTimer = null;
+  }
+  if (reasoningPending) {
+    streamedReasoning += reasoningPending;
+    reasoningPending = "";
+  }
+  if (contentPending) {
+    streamedContent += contentPending;
+    contentPending = "";
   }
 }
 
@@ -119,10 +198,13 @@ function setStreaming(streaming) {
 }
 
 function resetTurnState() {
+  flushPendingStreamUI();
   currentAiBlock = null;
   streamedContent = "";
   streamedReasoning = "";
   contentStarted = false;
+  reasoningPending = "";
+  contentPending = "";
 }
 
 function removeCurrentAiBlock() {
@@ -136,28 +218,20 @@ function setupListeners() {
   unsubReasoningDelta = window.electronAPI?.onChatReasoningDelta?.(({ delta } = {}) => {
     if (!showThinkingPanel || !currentAiBlock || !delta) return;
 
-    streamedReasoning += delta;
+    reasoningPending += delta;
 
     if (currentAiBlock.thinkingPanel) {
       currentAiBlock.thinkingPanel.hidden = false;
-      if (!contentStarted) {
-        currentAiBlock.thinkingPanel.classList.add("is-streaming");
-      }
     }
-    if (currentAiBlock.thinkingBody) {
-      currentAiBlock.thinkingBody.textContent = streamedReasoning;
-      if (currentAiBlock.thinkingPanel?.classList.contains("is-open")) {
-        currentAiBlock.thinkingBody.scrollTop = currentAiBlock.thinkingBody.scrollHeight;
-      }
-    }
-    updateThinkingLabel(currentAiBlock);
-    scrollToBottom();
+
+    scheduleReasoningUI();
   });
 
   unsubDelta = window.electronAPI?.onChatDelta?.(({ delta } = {}) => {
     if (!currentAiBlock || !delta) return;
 
     if (!contentStarted) {
+      flushPendingStreamUI();
       contentStarted = true;
       if (currentAiBlock.thinkingPanel) {
         currentAiBlock.thinkingPanel.classList.remove("is-streaming");
@@ -165,14 +239,18 @@ function setupListeners() {
         currentAiBlock.thinkingToggle?.setAttribute("aria-expanded", "false");
       }
       updateThinkingLabel(currentAiBlock);
+      if (currentAiBlock.thinkingBody && streamedReasoning) {
+        currentAiBlock.thinkingBody.textContent = streamedReasoning;
+      }
     }
 
-    streamedContent += delta;
-    currentAiBlock.responseBubble.textContent = streamedContent;
-    scrollToBottom();
+    contentPending += delta;
+    scheduleContentUI();
   });
 
   unsubDone = window.electronAPI?.onChatDone?.(() => {
+    flushPendingStreamUI();
+
     const finishedBlock = currentAiBlock;
     const finalContent = streamedContent;
     const finalReasoning = streamedReasoning;
@@ -183,7 +261,15 @@ function setupListeners() {
         finishedBlock.thinkingPanel.hidden = true;
       } else {
         updateThinkingLabel(finishedBlock);
-        renderMathOnly(finishedBlock.thinkingBody, finalReasoning);
+        if (finishedBlock.thinkingPanel.classList.contains("is-open")) {
+          if (finalReasoning.length > REASONING_MATH_MAX_CHARS) {
+            finishedBlock.thinkingBody.textContent = finalReasoning;
+          } else {
+            renderMathOnly(finishedBlock.thinkingBody, finalReasoning);
+          }
+        } else {
+          finishedBlock.thinkingBody.textContent = "";
+        }
       }
     }
 
@@ -220,6 +306,8 @@ async function sendMessage() {
 
   await refreshReasoningSetting();
 
+  reasoningPending = "";
+  contentPending = "";
   streamedContent = "";
   streamedReasoning = "";
   contentStarted = false;

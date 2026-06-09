@@ -80,8 +80,10 @@ theme-profile.md
 - **Config storage** — `user-config.json` in `app.getPath("userData")`, not project root.
 - **Chat context** — renderer holds full `messages[]` array; every request sends entire history for multi-turn context.
 - **Streaming** — main → renderer via `sender.send` (one-way push), not `ipcMain.handle` return values.
+- **Stream batching (two layers)** — `chat-middleware` batches IPC deltas before push; `chat.js` batches DOM updates before paint. Prevents UI freeze on long Ultra High reasoning streams (40k+ chars).
 - **OpenRouter reasoning** — only one of `reasoning.effort` OR `reasoning.max_tokens` per request (mutually exclusive).
-- **Thinking display** — reasoning tokens streamed separately via `oml:chat-reasoning-delta`; shown in collapsible panel in chat UI; display-only (not stored in `messages[]`).
+- **Thinking display** — reasoning tokens streamed separately via `oml:chat-reasoning-delta`; shown in collapsible panel in chat UI; display-only (not stored in `messages[]`). Body DOM updated only when panel is expanded; label char count updates on flush interval.
+- **API network logging** — `ai-service.js` logs request/response/stream lifecycle to main-process console; API key always masked.
 
 ---
 
@@ -163,7 +165,9 @@ User types message → push to `messages[]` → `chatSend` IPC → `chat-middlew
 
 Send shortcut: Ctrl+Enter
 
-Thinking panel: toggle expand/collapse; auto-collapses when response content starts; label shows char count
+Thinking panel: toggle expand/collapse; auto-collapses when response content starts; label shows char count (locale-formatted)
+
+Stream performance: see **Stream Performance & Batching** section below
 
 ---
 
@@ -188,7 +192,141 @@ Dependencies:
 - Reasoning level must be non-None for reasoning-capable models
 
 Workflow:
-Reasoning SSE → `onReasoningDelta` → `CHAT_REASONING_DELTA` → append to thinking panel → user toggles open/close → content SSE → auto-collapse panel → final response in `.msg-ai`
+Reasoning SSE → `onReasoningDelta` → `CHAT_REASONING_DELTA` (batched IPC) → `reasoningPending` buffer → throttled flush → label update; body update only if `is-open` → user toggles open/close (syncs pending on expand) → content SSE → auto-collapse panel → final response in `.msg-ai`
+
+Performance rules:
+- Collapsed panel: no per-token DOM writes to `.msg-thinking-body`
+- Expanded panel: body synced on flush interval only
+- On done: `renderMathOnly` skipped when reasoning exceeds `REASONING_MATH_MAX_CHARS`; plain `textContent` used instead
+- On done with collapsed panel: body cleared (content loaded lazily on next expand via toggle handler)
+
+---
+
+### Stream Performance & Batching
+
+Purpose: Keep renderer responsive during high-volume SSE streams (especially Ultra High reasoning). Introduced after UI freeze at ~43k reasoning chars.
+
+Entry Points:
+- `src/renderer/scripts/chat.js` — renderer-side DOM batching
+- `src/main/middlewares/chat-middleware.js` — main-process IPC batching
+
+#### Renderer constants (`chat.js`)
+
+| Constant | Value | Role |
+|---|---|---|
+| `REASONING_UI_FLUSH_MS` | 150 | Max delay before reasoning pending buffer merges into `streamedReasoning` and triggers label/body UI update |
+| `CONTENT_UI_FLUSH_MS` | 50 | Max delay before content pending buffer merges into `streamedContent` and updates response bubble |
+| `REASONING_MATH_MAX_CHARS` | 12000 | Above this length, thinking body skips KaTeX (`renderMathOnly`) on stream done — plain text only |
+
+#### Renderer state variables (`chat.js`)
+
+| Variable | Type | Role |
+|---|---|---|
+| `streamedReasoning` | string | Committed reasoning text (flushed from pending); source of truth for label count and expand sync |
+| `streamedContent` | string | Committed response text (flushed from pending) |
+| `reasoningPending` | string | Incoming reasoning deltas not yet flushed to `streamedReasoning` or DOM |
+| `contentPending` | string | Incoming content deltas not yet flushed to `streamedContent` or DOM |
+| `reasoningFlushTimer` | timeout id \| null | Active timer for `scheduleReasoningUI`; prevents duplicate flush scheduling |
+| `contentFlushTimer` | timeout id \| null | Active timer for `scheduleContentUI` |
+| `contentStarted` | boolean | True once first content delta arrives; triggers thinking panel auto-collapse |
+
+#### Renderer helper functions (`chat.js`)
+
+| Function | When called | What it does |
+|---|---|---|
+| `scheduleReasoningUI()` | Each `onChatReasoningDelta` | Starts 150ms timer if none active |
+| `flushReasoningUI()` | Timer fires | Moves `reasoningPending` → `streamedReasoning`; updates label; calls `syncThinkingBody` only if panel open |
+| `scheduleContentUI()` | Each `onChatDelta` | Starts 50ms timer if none active |
+| `flushContentUI()` | Timer fires | Moves `contentPending` → `streamedContent`; updates bubble; `scrollToBottom` |
+| `flushPendingStreamUI()` | Content start, `onChatDone`, `resetTurnState` | Clears timers; drains both pending buffers into committed strings synchronously |
+| `syncThinkingBody(aiBlock)` | `flushReasoningUI`, expand toggle | Writes `streamedReasoning` to `.msg-thinking-body` only when `.is-open` |
+| `updateThinkingLabel(aiBlock)` | Flush points | Shows `streamedReasoning.length + reasoningPending.length` with locale formatting |
+
+#### Main-process IPC batching (`chat-middleware.js`)
+
+| Symbol | Role |
+|---|---|
+| `createDeltaBatcher(sender, channel, flushMs)` | Factory; coalesces string chunks into single IPC `{ delta }` payloads every `flushMs` (default 50) |
+| `contentBatcher` | Batches `CHAT_DELTA` pushes |
+| `reasoningBatcher` | Batches `CHAT_REASONING_DELTA` pushes (only when reasoning ≠ None) |
+| `batcher.flush()` | Called on stream done and error to deliver final partial buffer before `CHAT_DONE` / `CHAT_ERROR` |
+
+#### Lifecycle sync points
+
+| Event | Action |
+|---|---|
+| Reasoning delta arrives | Append to `reasoningPending` → `scheduleReasoningUI` |
+| First content delta | `flushPendingStreamUI` → collapse thinking panel → `scheduleContentUI` |
+| User expands thinking | Drain `reasoningPending` into `streamedReasoning` → full `textContent` sync |
+| Stream done | `flushPendingStreamUI` → conditional math render → `resetTurnState` clears all buffers |
+| Error | `removeCurrentAiBlock` → `resetTurnState` via `flushPendingStreamUI` |
+
+#### Future utilization
+
+- **Tune flush intervals** — lower `REASONING_UI_FLUSH_MS` for snappier label; raise for weaker hardware; expose as advanced setting
+- **Reuse batching pattern** — tool-call streams, multi-modal deltas, or future side-channel IPC (e.g. citations, token usage live meter) should use same pending-buffer + timer + `flushOnDone` pattern
+- **IPC batching reuse** — `createDeltaBatcher` can wrap any high-frequency `sender.send` channel
+- **Lazy render threshold** — `REASONING_MATH_MAX_CHARS` pattern applies to response bubble too if `renderRichContent` becomes slow on huge replies
+- **Virtualized thinking view** — if reasoning grows past ~100k chars, replace full `textContent` with chunked/virtual scroll while keeping same pending-buffer ingest
+- **Metrics UI** — wire `ai-service` stream stats (see API logging section) to a debug panel without changing ingest path
+- **Abort/cancel** — `flushPendingStreamUI` is the single drain point to call before tearing down an in-flight turn
+
+---
+
+### API Network Logging
+
+Purpose: Observable OpenRouter request/response/stream lifecycle in main-process console (terminal / Debug Console).
+
+Entry Points:
+- `src/main/services/ai-service.js` → `streamChat()`
+- `src/main/middlewares/chat-middleware.js` → `SendMessage` entry log
+
+Log prefixes: `[ai-service]`, `[chat-middleware]`
+
+#### Request log (`streamChat → request`)
+
+Fields: url, method, model, stream, masked apiKey, messageCount, promptChars, roles, reasoning options, header summary (key masked)
+
+#### Response log (`streamChat ← response`)
+
+Fields: model, status, statusText, ok, elapsedMs, contentType
+
+#### Stream stats object (internal, logged on done)
+
+| Field | Meaning |
+|---|---|
+| `startedAt` | `Date.now()` at request start |
+| `deltaCount` | Content delta events received |
+| `deltaChars` | Total content characters streamed |
+| `reasoningCount` | Reasoning delta events received |
+| `reasoningChars` | Total reasoning characters streamed |
+| `sseChunks` | Raw SSE read chunks from `ReadableStream` |
+| `lastUsage` | Token usage object from final SSE chunk (when OpenRouter sends it) |
+| `timeToFirstByteMs` | Request start → HTTP response headers |
+| `timeToFirstContentMs` | Request start → first content delta |
+| `timeToFirstReasoningMs` | Request start → first reasoning delta |
+
+#### Completion / error logs
+
+- `streamChat ✓ done` — all stats fields + `totalElapsedMs`
+- `streamChat ✗ HTTP error` — status + response body snippet (800 chars)
+- `streamChat ✗ API error in stream` — inline SSE error object
+- `streamChat ✗ exception` — network/parse failures
+
+#### Helpers
+
+| Function | Role |
+|---|---|
+| `maskApiKey(key)` | Shows `sk-o...xxxx`; never logs full key |
+| `summarizeMessages(messages)` | messageCount, promptChars, roles — for request log without dumping prompt text |
+
+#### Future utilization
+
+- Pipe stats to renderer debug overlay or status bar (IPC channel e.g. `oml:chat-stats`)
+- Persist last request metrics per session for support diagnostics
+- Alert on slow `timeToFirstByteMs` or stuck streams (no delta for N seconds)
+- Correlate with renderer flush timings to diagnose end-to-end latency
+- Add log level env flag without removing structured fields
 
 ---
 
@@ -246,7 +384,7 @@ Files:
 Trigger: User clicks Send or Ctrl+Enter on chat screen.
 
 Flow:
-`chat.js` → append user bubble + push to `messages[]` → `electronAPI.chatSend({ messages })` → `chat-middleware.SendMessage` → read config → `buildReasoningOptions()` → `ai-service.streamChat()` → OpenRouter SSE → `CHAT_REASONING_DELTA` (thinking panel) + `CHAT_DELTA` (response) → `CHAT_DONE` → store assistant `content` in `messages[]` (reasoning not persisted)
+`chat.js` → append user bubble + push to `messages[]` → `electronAPI.chatSend({ messages })` → `chat-middleware.SendMessage` (entry log) → read config → `buildReasoningOptions()` → `ai-service.streamChat()` (request/response logs) → OpenRouter SSE → `createDeltaBatcher` → `CHAT_REASONING_DELTA` + `CHAT_DELTA` (batched IPC) → `chat.js` pending buffers + throttled DOM → batcher flush → `CHAT_DONE` → `renderRichContent` on response → store assistant `content` in `messages[]` (reasoning not persisted)
 
 Files:
 - `src/renderer/scripts/chat.js`
@@ -281,7 +419,10 @@ Files:
 | Preload bridge (renderer API) | `src/preload/index.js` |
 | Config save/load (middleware) | `src/main/middlewares/config-middleware.js` |
 | Chat send (middleware) | `src/main/middlewares/chat-middleware.js` |
+| IPC delta batching | `src/main/middlewares/chat-middleware.js` → `createDeltaBatcher()` |
 | Reasoning level mapping | `src/main/middlewares/chat-middleware.js` → `buildReasoningOptions()` |
+| Stream DOM batching | `src/renderer/scripts/chat.js` → pending buffers + flush helpers |
+| API network logging | `src/main/services/ai-service.js` → `maskApiKey`, `summarizeMessages`, stream stats |
 | Config persistence (key/value JSON) | `src/main/services/config-service.js` |
 | OpenRouter streaming API | `src/main/services/ai-service.js` |
 | Reasoning delta parsing | `src/main/services/ai-service.js` → `extractReasoningDeltas()` |
@@ -326,11 +467,13 @@ Renderer (chat.js) — holds messages[]
 ### Chat Flow (streaming response)
 ```
 OpenRouter SSE
-  → ai-service (parse data: lines — content + reasoning)
-  → chat-middleware (safeSend)
-  → sender.send(CHAT_REASONING_DELTA | CHAT_DELTA | CHAT_DONE | CHAT_ERROR)
+  → ai-service (parse data: lines — content + reasoning; accumulate stats)
+  → chat-middleware (createDeltaBatcher — 50ms coalesce)
+  → sender.send(CHAT_REASONING_DELTA | CHAT_DELTA)
+  → batcher.flush() on done/error
+  → sender.send(CHAT_DONE | CHAT_ERROR)
   → preload subscribe
-  → chat.js (thinking panel / response bubble / error)
+  → chat.js (reasoningPending / contentPending → throttled flush → thinking panel / response bubble)
 ```
 
 ---
@@ -390,7 +533,10 @@ Changing may impact: home screen form, IPC save/get handlers
 Changing may impact: all chat streaming, error logging, OpenRouter request format
 
 ### chat-middleware.js
-Changing may impact: reasoning level mapping, chat error forwarding, stream push to renderer
+Changing may impact: reasoning level mapping, chat error forwarding, stream push to renderer, IPC batching intervals, flush-on-done ordering
+
+### chat.js (stream state)
+Changing may impact: thinking panel responsiveness, char count display, content/reasoning flush timing, math render threshold for thinking body. Key symbols: `REASONING_UI_FLUSH_MS`, `CONTENT_UI_FLUSH_MS`, `REASONING_MATH_MAX_CHARS`, `reasoningPending`, `contentPending`, `flushPendingStreamUI`
 
 ### channels.js
 Changing may impact: preload, register.js, chat-middleware — all IPC wiring must stay in sync
@@ -409,7 +555,8 @@ Changing may impact: all UI screens and future components
 - **Module system:** CommonJS in main/preload; ES modules (`type="module"`) in renderer scripts
 - **Screen pattern:** `screens/<name>/index.html` + `../../scripts/<name>.js` + local `styles/<name>.css`
 - **Empty reserved dirs:** `src/main/helpers/`, `src/renderer/screens/` (placeholder), `src/renderer/assets/icons/`, `build/`
-- **Logging:** `[service-name]` or `[middleware-name]` prefix in `console.error` for API failures
+- **Logging:** `[service-name]` or `[middleware-name]` prefix; `ai-service` uses `console.log` for request/response/done and `console.error` for failures; API keys always masked via `maskApiKey()`
+- **Stream batching defaults:** IPC 50ms (`createDeltaBatcher`), reasoning DOM 150ms, content DOM 50ms, thinking math cap 12000 chars
 - **CSP:** `default-src 'self'; script-src 'self'; style-src 'self'` on all HTML pages
 - **No tests** currently in project
 - **No .env** — API key stored via config form, not environment variables
