@@ -30,47 +30,64 @@ function createBubble(role, content = "") {
   return bubble;
 }
 
+async function refreshReasoningSetting() {
+  const level = await window.electronAPI?.getConfig?.("reasoning");
+  showThinkingPanel = Boolean(level && level !== "None");
+}
+
 function createAiMessageBlock() {
   const block = document.createElement("div");
   block.className = "msg-ai-block";
 
-  const thinkingPanel = document.createElement("div");
-  thinkingPanel.className = "msg-thinking-panel";
-  thinkingPanel.hidden = true;
+  let thinkingPanel = null;
+  let thinkingToggle = null;
+  let thinkingLabel = null;
+  let thinkingBody = null;
 
-  const thinkingToggle = document.createElement("button");
-  thinkingToggle.type = "button";
-  thinkingToggle.className = "msg-thinking-toggle";
-  thinkingToggle.setAttribute("aria-expanded", "false");
+  if (showThinkingPanel) {
+    thinkingPanel = document.createElement("div");
+    thinkingPanel.className = "msg-thinking-panel";
+    thinkingPanel.hidden = true;
 
-  const thinkingChevron = document.createElement("span");
-  thinkingChevron.className = "msg-thinking-chevron";
-  thinkingChevron.setAttribute("aria-hidden", "true");
-  thinkingChevron.textContent = "\u25B8";
+    thinkingToggle = document.createElement("button");
+    thinkingToggle.type = "button";
+    thinkingToggle.className = "msg-thinking-toggle";
+    thinkingToggle.setAttribute("aria-expanded", "false");
 
-  const thinkingLabel = document.createElement("span");
-  thinkingLabel.className = "msg-thinking-toggle-label";
-  thinkingLabel.textContent = "Thinking\u2026";
+    const thinkingChevron = document.createElement("span");
+    thinkingChevron.className = "msg-thinking-chevron";
+    thinkingChevron.setAttribute("aria-hidden", "true");
+    thinkingChevron.textContent = "\u25B8";
 
-  thinkingToggle.append(thinkingChevron, thinkingLabel);
+    thinkingLabel = document.createElement("span");
+    thinkingLabel.className = "msg-thinking-toggle-label";
+    thinkingLabel.textContent = "Thinking\u2026";
 
-  const thinkingBody = document.createElement("pre");
-  thinkingBody.className = "msg-thinking-body";
+    thinkingToggle.append(thinkingChevron, thinkingLabel);
 
-  thinkingPanel.append(thinkingToggle, thinkingBody);
+    thinkingBody = document.createElement("pre");
+    thinkingBody.className = "msg-thinking-body";
 
-  thinkingToggle.addEventListener("click", () => {
-    const isOpen = thinkingPanel.classList.toggle("is-open");
-    thinkingToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    if (isOpen) {
-      thinkingBody.scrollTop = thinkingBody.scrollHeight;
-    }
-  });
+    thinkingPanel.append(thinkingToggle, thinkingBody);
+
+    thinkingToggle.addEventListener("click", () => {
+      const isOpen = thinkingPanel.classList.toggle("is-open");
+      thinkingToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      if (isOpen) {
+        thinkingBody.scrollTop = thinkingBody.scrollHeight;
+      }
+    });
+  }
 
   const responseBubble = document.createElement("div");
   responseBubble.className = "msg msg-ai";
 
-  block.append(thinkingPanel, responseBubble);
+  if (thinkingPanel) {
+    block.append(thinkingPanel, responseBubble);
+  } else {
+    block.append(responseBubble);
+  }
+
   messagesEl.appendChild(block);
   scrollToBottom();
 
@@ -117,7 +134,7 @@ function removeCurrentAiBlock() {
 
 function setupListeners() {
   unsubReasoningDelta = window.electronAPI?.onChatReasoningDelta?.(({ delta } = {}) => {
-    if (!currentAiBlock || !delta) return;
+    if (!showThinkingPanel || !currentAiBlock || !delta) return;
 
     streamedReasoning += delta;
 
@@ -160,7 +177,7 @@ function setupListeners() {
     const finalContent = streamedContent;
     const finalReasoning = streamedReasoning;
 
-    if (finishedBlock?.thinkingPanel) {
+    if (showThinkingPanel && finishedBlock?.thinkingPanel) {
       finishedBlock.thinkingPanel.classList.remove("is-streaming");
       if (finalReasoning.length === 0) {
         finishedBlock.thinkingPanel.hidden = true;
@@ -201,6 +218,8 @@ async function sendMessage() {
   createBubble("user", text);
   messages.push({ role: "user", content: text });
 
+  await refreshReasoningSetting();
+
   streamedContent = "";
   streamedReasoning = "";
   contentStarted = false;
@@ -224,6 +243,7 @@ async function init() {
     return;
   }
 
+  await refreshReasoningSetting();
   setupListeners();
 }
 
