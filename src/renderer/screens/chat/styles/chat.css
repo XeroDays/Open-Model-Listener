@@ -274,6 +274,21 @@
 .msg-ai .katex-display {
   margin: var(--space-sm) 0;
   overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.msg-prose .katex-display {
+  display: block;
+  margin: var(--space-sm) 0;
+  padding: var(--space-sm) var(--space-md);
+  overflow-x: auto;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.msg-prose .katex {
+  color: var(--text-primary);
 }
 
 .msg-thinking-body .katex {

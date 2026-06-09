@@ -413,7 +413,7 @@ Changing may impact: all UI screens and future components
 - **CSP:** `default-src 'self'; script-src 'self'; style-src 'self'` on all HTML pages
 - **No tests** currently in project
 - **No .env** — API key stored via config form, not environment variables
-- **Rich chat rendering** — `rich-render.js` uses vendored `marked` (Markdown) + KaTeX (math); renders after stream completes; supports headings, lists, fenced code blocks, inline code, LaTeX
+- **Rich chat rendering** — `rich-render.js` uses vendored `marked` (Markdown) + KaTeX (math); renders after stream completes; preprocesses AI `[...]` bracket math → `\[...\]`; supports `\boxed{}`, headings, lists, fenced code blocks, inline code, LaTeX `\(...\)` / `\[...\]`
 
 ---
 
